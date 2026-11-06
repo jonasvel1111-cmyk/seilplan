@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f2230">
+<meta name="description" content="Passasjeplanlegging for langtursseiling: værvinduer, flere værmodeller, ankring og steder i nærheten.">
+<title>Seilplan</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">Seilplan</div>
+    <div class="gps" id="gps">
+      <span class="fix" id="fix">Venter på GPS</span>
+      <b id="pos">–</b>
+      <span id="sogcog">SOG – · COG –</span>
+    </div>
+    <div class="status">
+      <span class="pill" id="net">Online</span>
+      <span class="pill" id="age">Ingen varsel</span>
+      <button class="ib" id="nightbtn" aria-pressed="false" title="Nattlys">Natt</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="mapwrap">
+      <div id="map" class="map" aria-label="Kart"></div>
+      <div class="mapctl">
+        <button class="ib big" id="zin" aria-label="Zoom inn">+</button>
+        <button class="ib big" id="zout" aria-label="Zoom ut">−</button>
+        <button class="ib big" id="follow" aria-pressed="false" aria-label="Følg båten">◎</button>
+        <button class="ib big" id="seamarks" aria-pressed="true" aria-label="Vis sjømerker" title="Sjømerker (OpenSeaMap)">⚓</button>
+        <button class="ib big" id="fitroute" aria-label="Vis hele ruten" title="Vis hele ruten">⤢</button>
+      </div>
+      <div class="maphint" id="maphint" hidden></div>
+      <div class="attrib">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://openseamap.org" target="_blank" rel="noopener">OpenSeaMap</a> · Vær: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></div>
+    </section>
+
+    <aside class="panel">
+      <nav class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="pass" aria-selected="true">Passasje</button>
+        <button class="tab" role="tab" data-tab="vaer" aria-selected="false">Vær</button>
+        <button class="tab" role="tab" data-tab="ank" aria-selected="false">Ankring</button>
+        <button class="tab" role="tab" data-tab="naer" aria-selected="false">I nærheten</button>
+        <button class="tab" role="tab" data-tab="inn" aria-selected="false" aria-label="Innstillinger">⚙</button>
+      </nav>
+
+      <!-- PASSASJE -->
+      <div class="view" id="v-pass">
+        <div class="ends">
+          <div class="end" id="endA">
+            <span class="badge a">A</span>
+            <div class="endtxt"><b id="nameA">Ikke valgt</b><span id="posA"></span></div>
+            <div class="endbtns"><button class="btn sm" data-end="A" data-act="gps">GPS</button><button class="btn sm" data-end="A" data-act="map" aria-pressed="false">Kart</button><button class="btn sm" data-end="A" data-act="search">Søk</button></div>
+          </div>
+          <div class="search" id="searchA" hidden><input type="search" id="qA" placeholder="Havn, by eller øy" autocomplete="off"><div class="results" id="resA"></div></div>
+          <div class="vias" id="vias"></div>
+          <div class="end" id="endB">
+            <span class="badge b">B</span>
+            <div class="endtxt"><b id="nameB">Ikke valgt</b><span id="posB"></span></div>
+            <div class="endbtns"><button class="btn sm" data-end="B" data-act="gps">GPS</button><button class="btn sm" data-end="B" data-act="map" aria-pressed="false">Kart</button><button class="btn sm" data-end="B" data-act="search">Søk</button></div>
+          </div>
+          <div class="search" id="searchB" hidden><input type="search" id="qB" placeholder="Havn, by eller øy" autocomplete="off"><div class="results" id="resB"></div></div>
+          <div class="row">
+            <button class="btn sm" id="addvia" aria-pressed="false">+ Via-punkt</button>
+            <button class="btn sm" id="swap">Bytt A og B</button>
+            <button class="btn sm" id="clearroute">Ny passasje</button>
+          </div>
+          <p class="note">Ruten tegnes som storsirkel. Legg inn via-punkter for å styre rundt land, og dra dem i kartet. Kontroller alltid ruten i sjøkart og kartplotter.</p>
+        </div>
+
+        <div class="times">
+          <label class="tf" for="dep"><span>Avreise <small>(lokal tid)</small></span><input type="datetime-local" id="dep"></label>
+          <div class="tf"><span>Ankomst</span><b id="arr">–</b></div>
+        </div>
+        <div class="row">
+          <button class="btn sm" id="depnow">Avreise nå</button>
+          <label class="inl" for="speed">Snittfart <input type="number" id="speed" min="1" max="15" step="0.5" inputmode="decimal"> kn</label>
+        </div>
+        <div class="stats">
+          <div class="stat"><span>Distanse</span><b id="sdist">–</b></div>
+          <div class="stat"><span>Varighet</span><b id="sdur">–</b></div>
+          <div class="stat"><span>Kilde</span><b id="ssrc">–</b></div>
+        </div>
+
+        <div class="fetchrow">
+          <button class="btn primary" id="fetchwx">Hent værvarsel for ruten</button>
+          <span class="fetchmsg" id="fetchmsg"></span>
+        </div>
+
+        <div id="season"></div>
+        <div id="summary"></div>
+
+        <section class="block" id="winsblock" hidden>
+          <h2>Beste avreise</h2>
+          <div class="timeline" id="tl" aria-label="Score per avreisetidspunkt"></div>
+          <div class="tlx" id="tlx"></div>
+          <div class="cards" id="wins"></div>
+        </section>
+
+        <details class="fold" id="underveis" hidden>
+          <summary>Underveis, punkt for punkt</summary>
+          <div class="tablewrap"><table class="tbl" id="legtab"></table></div>
+        </details>
+      </div>
+
+      <!-- VÆR -->
+      <div class="view" id="v-vaer" hidden>
+        <h2>Værkilde</h2>
+        <div class="chips" id="srcchips" role="group" aria-label="Velg værmodell"></div>
+        <div id="agree"></div>
+        <section class="block card">
+          <div class="cmp-h"><h2>Vind der båten er, underveis</h2><div class="legend" id="cmplegend"></div></div>
+          <div class="cmpchart" id="cmpchart"><svg id="cmpsvg" viewBox="0 0 420 190" role="img" aria-label="Vindstyrke per modell langs passasjen"></svg><div class="tip" id="cmptip" hidden></div></div>
+          <p class="note" id="cmpnote"></p>
+        </section>
+        <section class="block">
+          <h2>Modellene side om side</h2>
+          <div class="tablewrap"><table class="tbl" id="srctab"></table></div>
+        </section>
+        <p class="note">Vind fra ECMWF, GFS, ICON, GEM og UK Met Office via Open-Meteo. Bølger, dønning og havstrøm fra Open-Meteos havmodell (inntil 8 døgn). Varsler lenger fram enn 5–7 døgn er usikre. Ved uenighet: planlegg etter den mest forsiktige og ha en plan B.</p>
+      </div>
+
+      <!-- ANKRING -->
+      <div class="view" id="v-ank" hidden>
+        <div class="row">
+          <button class="btn sm" id="ankB">Ved mål (B)</button>
+          <button class="btn sm" id="ankGps">Her jeg er</button>
+          <button class="btn sm" id="ankMap" aria-pressed="false">Velg i kart</button>
+        </div>
+        <div class="place" id="ankplace">Velg hvor du vil ankre.</div>
+        <div class="row" role="group" aria-label="Hvor lenge blir du">
+          <span class="lbl">Blir i</span>
+          <div class="chips" id="staychips"></div>
+        </div>
+        <div id="ankout"></div>
+        <section class="block card">
+          <h2>Kjetting</h2>
+          <div class="row">
+            <label class="inl" for="depth">Dybde <input type="number" id="depth" min="1" max="60" step="0.5" value="6" inputmode="decimal"> m</label>
+            <span id="chain" class="chainout"></span>
+          </div>
+        </section>
+        <section class="block card" id="aibox">
+          <div class="row" style="justify-content:space-between"><h2>AI-råd om ankring</h2><button class="btn sm primary" id="aibtn">Få råd</button></div>
+          <div id="aiout" class="aiout note">Legg inn en Anthropic API-nøkkel under ⚙ for å få AI-råd som vurderer varslet for stedet.</div>
+        </section>
+        <button class="btn" id="findank">Finn ankringsplasser rundt stedet</button>
+      </div>
+
+      <!-- I NÆRHETEN -->
+      <div class="view" id="v-naer" hidden>
+        <div class="row">
+          <button class="btn sm" id="nGps">Rundt meg</button>
+          <button class="btn sm" id="nMap">Rundt kartets midte</button>
+          <div class="chips" id="radchips"></div>
+        </div>
+        <div class="place" id="nplace">Velg om du vil søke rundt deg eller rundt kartets midte.</div>
+        <div class="seg" role="tablist">
+          <button class="segb" data-sub="steder" aria-selected="true">Steder</button>
+          <button class="segb" data-sub="akt" aria-selected="false">Aktiviteter og arrangementer</button>
+        </div>
+
+        <div id="sub-steder" class="sub">
+          <div class="chips" id="catchips"></div>
+          <div id="nlist" class="list"></div>
+          <p class="note">Data fra OpenStreetMap og Wikipedia. Opplysningene kan være mangelfulle; sjekk havneguide og lokale kilder.</p>
+        </div>
+
+        <div id="sub-akt" class="sub" hidden>
+          <div class="times">
+            <label class="tf" for="evFrom"><span>Jeg er her fra</span><input type="date" id="evFrom"></label>
+            <label class="tf" for="evTo"><span>til</span><input type="date" id="evTo"></label>
+          </div>
+          <section class="block card">
+            <h2>Arrangementer og festivaler</h2>
+            <div id="evlist" class="list"></div>
+            <div class="row"><button class="btn sm primary" id="evAi">Søk med AI</button><button class="btn sm" id="evTm">Hent fra Ticketmaster</button></div>
+            <div id="evai" class="aiout"></div>
+          </section>
+          <section class="block">
+            <h2>Utleie, turer og opplevelser</h2>
+            <div class="chips" id="actchips"></div>
+            <div id="actlist" class="list"></div>
+          </section>
+          <section class="block card">
+            <h2>Turer du kan melde deg på</h2>
+            <div class="links" id="booklinks"></div>
+            <p class="note">Åpner søk hos bookingtjenestene for stedet du er. Der kan du se pris, tider og melde deg på.</p>
+          </section>
+        </div>
+      </div>
+
+      <!-- INNSTILLINGER -->
+      <div class="view" id="v-inn" hidden>
+        <section class="block card">
+          <h2>Båten</h2>
+          <div class="grid2">
+            <label class="fl" for="sSpeed">Snittfart (kn)<input type="number" id="sSpeed" step="0.5" min="1" max="15"></label>
+            <label class="fl" for="sLen">Lengde (m)<input type="number" id="sLen" step="0.5" min="4" max="40"></label>
+          </div>
+        </section>
+        <section class="block card">
+          <h2>Mine grenser for havpassasje</h2>
+          <div class="grid2">
+            <label class="fl" for="sWmin">Motor under (kn vind)<input type="number" id="sWmin" step="1" min="0" max="15"></label>
+            <label class="fl" for="sWmax">Maks vind (kn)<input type="number" id="sWmax" step="1" min="10" max="50"></label>
+            <label class="fl" for="sGmax">Maks kast (kn)<input type="number" id="sGmax" step="1" min="10" max="70"></label>
+            <label class="fl" for="sHmax">Maks bølgehøyde (m)<input type="number" id="sHmax" step="0.5" min="0.5" max="10"></label>
+          </div>
+          <label class="ck" for="sBeat"><input type="checkbox" id="sBeat"> Unngå kryss (motvind under 45°)</label>
+        </section>
+        <section class="block card">
+          <h2>Visning</h2>
+          <label class="ck" for="sUtc"><input type="checkbox" id="sUtc"> Vis tider i UTC</label>
+          <label class="ck" for="sWake"><input type="checkbox" id="sWake"> Hold skjermen på</label>
+          <label class="fl" for="sLangs">Wikipedia-språk (kommaseparert)<input type="text" id="sLangs" placeholder="no,en"></label>
+        </section>
+        <section class="block card">
+          <h2>AI-råd (valgfritt)</h2>
+          <label class="fl" for="sKey">Anthropic API-nøkkel<input type="password" id="sKey" autocomplete="off" placeholder="sk-ant-…"></label>
+          <p class="note">Nøkkelen lagres bare på dette nettbrettet og sendes bare til Anthropic når du ber om AI-råd eller AI-søk etter arrangementer. AI-søket bruker websøk i Anthropic-kontoen din.</p>
+        </section>
+        <section class="block card">
+          <h2>Arrangementer (valgfritt)</h2>
+          <label class="fl" for="sTm">Ticketmaster API-nøkkel<input type="password" id="sTm" autocomplete="off" placeholder="Gratis fra developer.ticketmaster.com"></label>
+          <p class="note">Gir konserter, festivaler og sport med dato i mange land. Uten nøkkel kan du bruke AI-søk eller lenkene til bookingtjenester.</p>
+        </section>
+        <section class="block card">
+          <h2>Lagret data</h2>
+          <div class="row"><button class="btn sm" id="clearcache">Tøm lagrede kartfliser</button><span class="note" id="cacheinfo"></span></div>
+        </section>
+        <p class="note"><b>Viktig:</b> Seilplan gir forslag til omtrentlig rute, værvinduer og ankring. Den er ikke et navigasjonssystem. Bruk godkjente sjøkart, kartplotter, offisielle værvarsler og eget skjønn.</p>
+        <p class="note">Kart © OpenStreetMap-bidragsytere (ODbL), sjømerker © OpenSeaMap. Vær © Open-Meteo (CC BY 4.0) med data fra ECMWF, NOAA, DWD, ECCC og UK Met Office. Steder fra OpenStreetMap og Wikipedia.</p>
+      </div>
+    </aside>
+  </main>
+</div>
+<script src="js/geo.js"></script>
+<script src="js/map.js"></script>
+<script src="js/wx.js"></script>
+<script src="js/nearby.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
