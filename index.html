@@ -8,12 +8,20 @@
 <title>Seilplan</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Seilplan">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<div class="iosbar" id="iosbar" hidden>
+  <div><b>Installer Seilplan som app.</b> Trykk på Del-knappen i Safari <span class="shr" aria-hidden="true">⬆︎</span> (øverst til høyre, eller under <b>•••</b>), og velg <b>Legg til på Hjem-skjerm</b>. Hvis du ser valget <b>Åpne som nettapp</b>, la det være på. Åpne så Seilplan fra Hjem-skjermen.</div>
+  <button class="ib" id="iosclose" aria-label="Lukk">✕</button>
+</div>
 <div id="app">
   <header class="top">
     <div class="brand">Seilplan</div>

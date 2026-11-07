@@ -1,6 +1,6 @@
 /* Seilplan service worker: the app works without internet, and map tiles you have viewed stay available at sea. */
-const APP = 'seilplan-app-v1', TILES = 'seilplan-tiles', MAX_TILES = 6000;
-const SHELL = ['./', 'index.html', 'css/style.css', 'js/geo.js', 'js/map.js', 'js/wx.js', 'js/nearby.js', 'js/app.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
+const APP = 'seilplan-app-v2', TILES = 'seilplan-tiles', MAX_TILES = 6000;
+const SHELL = ['./', 'index.html', 'css/style.css', 'js/geo.js', 'js/map.js', 'js/wx.js', 'js/nearby.js', 'js/app.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(APP).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k.startsWith('seilplan-app-') && k !== APP).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });

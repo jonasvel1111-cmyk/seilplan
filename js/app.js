@@ -523,6 +523,12 @@ Svar på norsk bokmål. Lag to overskrifter: Arrangementer og Turer og utleie. U
   if (!st.view && routePts().length >= 2) map.fit(routePts().map((p) => [p.lat, p.lon]), 60);
   WX.kv.get('route').then((d) => { if (d && d.key === routeKey()) { WXD = d; renderAll(); $('#fetchmsg').textContent = `Lagret varsel fra ${fmtT(d.fetchedAt / 1000)}.`; } scheduleFetch(); });
   WX.kv.get('ank').then((d) => { if (d && st.ank && d.key === st.ank.lat.toFixed(3) + ',' + st.ank.lon.toFixed(3)) { ANKD = d; if (tab === 'ank') renderAnk(); } });
+  // iPad/iPhone: Safari has no install prompt, so show how to add Seilplan to the Home Screen
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const standalone = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  let iosSeen = false; try { iosSeen = localStorage.getItem('seilplan.ioshint') === '1'; } catch {}
+  if (ios && !standalone && !iosSeen) $('#iosbar').hidden = false;
+  $('#iosclose').onclick = () => { $('#iosbar').hidden = true; try { localStorage.setItem('seilplan.ioshint', '1'); } catch {} };
   if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
   window.__seilplan = { st, map, get WXD() { return WXD; } };
 })();
