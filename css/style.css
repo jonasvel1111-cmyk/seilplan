@@ -64,6 +64,14 @@ main { display: grid; grid-template-columns: minmax(0, 1fr) 440px; min-height: 0
 .sm-marker { position: absolute; left: 0; top: 0; width: 0; height: 0; }
 .sm-marker > * { position: absolute; transform: translate(-50%, -50%); }
 .sm-marker.clickable > * { cursor: pointer; }
+/* hide/show the panel so the map can fill the screen */
+.panelbtn { position: absolute; z-index: 5; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 10px 20px; font-weight: 700; font-size: 15px; box-shadow: 0 2px 10px rgb(0 0 0 / .2); cursor: pointer; }
+.panelbtn::before { content: "▾ "; }
+.panelbtn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.panelbtn[aria-pressed="true"]::before { content: "▴ "; }
+@media (min-width: 900px) { .panelbtn { left: auto; right: max(12px, env(safe-area-inset-right, 0px)); transform: none; } .panelbtn::before { content: "▸ "; } .panelbtn[aria-pressed="true"]::before { content: "◂ "; } }
+#app.maponly main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+#app.maponly .panel { display: none; }
 .mapctl { position: absolute; right: max(12px, env(safe-area-inset-right, 0px)); top: 12px; display: flex; flex-direction: column; gap: 8px; }
 .ib { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 5px 10px; cursor: pointer; font-weight: 600; }
 .ib.big { width: 46px; height: 46px; padding: 0; font-size: 20px; display: grid; place-items: center; }

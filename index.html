@@ -40,6 +40,7 @@
   <main>
     <section class="mapwrap">
       <div id="map" class="map" aria-label="Kart"></div>
+      <button class="panelbtn" id="panelbtn" aria-pressed="false" aria-controls="panel">Bare kart</button>
       <div class="mapctl">
         <button class="ib big" id="zin" aria-label="Zoom inn">+</button>
         <button class="ib big" id="zout" aria-label="Zoom ut">−</button>
@@ -51,7 +52,7 @@
       <div class="attrib">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://openseamap.org" target="_blank" rel="noopener">OpenSeaMap</a> · Vær: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></div>
     </section>
 
-    <aside class="panel">
+    <aside class="panel" id="panel">
       <nav class="tabs" role="tablist">
         <button class="tab" role="tab" data-tab="pass" aria-selected="true">Passasje</button>
         <button class="tab" role="tab" data-tab="vaer" aria-selected="false">Vær</button>

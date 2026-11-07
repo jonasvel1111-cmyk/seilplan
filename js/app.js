@@ -506,6 +506,11 @@ Svar på norsk bokmål. Lag to overskrifter: Arrangementer og Turer og utleie. U
   });
   $('#clearcache').onclick = async () => { try { await caches.delete('seilplan-tiles'); $('#cacheinfo').textContent = 'Kartfliser slettet.'; } catch { $('#cacheinfo').textContent = 'Kunne ikke slette.'; } };
 
+  /* ---------------- map only ---------------- */
+  function applyMapOnly() { $('#app').classList.toggle('maponly', !!st.mapOnly); const b = $('#panelbtn'); b.setAttribute('aria-pressed', !!st.mapOnly); b.textContent = st.mapOnly ? 'Vis meny' : 'Bare kart'; }
+  $('#panelbtn').onclick = () => { st.mapOnly = !st.mapOnly; applyMapOnly(); save(); };
+  $$('.tab').forEach((b) => b.addEventListener('click', () => { if (st.mapOnly) { st.mapOnly = false; applyMapOnly(); save(); } }));
+
   /* ---------------- tabs ---------------- */
   function setTab(t) {
     tab = t; $$('.tab').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === t)); $$('.view').forEach((v) => (v.hidden = v.id !== 'v-' + t));
@@ -517,7 +522,7 @@ Svar på norsk bokmål. Lag to overskrifter: Arrangementer og Turer og utleie. U
   function renderAll() { renderPass(); if (tab === 'vaer') renderVaer(); if (tab === 'ank') renderAnk(); if (tab === 'naer') renderNear(); updateTop(); }
 
   /* ---------------- start ---------------- */
-  applyNight(); syncSettings(); wake();
+  applyNight(); applyMapOnly(); syncSettings(); wake();
   SAMPLES = routePts().length >= 2 ? G.samples(routePts(), 48) : [];
   drawRoute(); renderPass(); updateTop();
   if (!st.view && routePts().length >= 2) map.fit(routePts().map((p) => [p.lat, p.lon]), 60);
